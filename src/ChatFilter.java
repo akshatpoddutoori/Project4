@@ -1,6 +1,6 @@
-package chatapplication;
 
-public class xChatFilter {
+
+public class ChatFilter {
 
     public ChatFilter(String badWordsFileName) {
 

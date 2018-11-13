@@ -1,4 +1,3 @@
-package chatapplication;
 
 import java.io.Serializable;
 
