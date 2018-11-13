@@ -1,5 +1,3 @@
-package chatapplication;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -98,8 +96,10 @@ final class ChatClient {
     private final class ListenFromServer implements Runnable {
         public void run() {
             try {
-                String msg = (String) sInput.readObject();
-                System.out.print(msg);
+                while(true) {
+                    String msg = (String) sInput.readObject();
+                    System.out.print(msg);
+                }
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }

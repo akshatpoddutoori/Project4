@@ -1,5 +1,3 @@
-package chatapplication;
-
 import java.io.Serializable;
 
 final class ChatMessage implements Serializable {
