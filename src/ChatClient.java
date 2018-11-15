@@ -77,14 +77,29 @@ final class ChatClient {
      * If the username is not specified "Anonymous" should be used
      */
     public static void main(String[] args) {
+        // ChatClient --> server    port#   username
+        // args       --> username  port#   server
         // Get proper arguments and override defaults
+        ChatClient client;
+        if (args.length == 3)
+            client = new ChatClient(args[2], Integer.parseInt(args[1]), args[0]);
+        else if (args.length == 2)
+            client = new ChatClient("localhost", Integer.parseInt(args[1]), args[0]);
+        else if (args.length == 1)
+            client = new ChatClient("localhost", 1500, args[0]);
+        else
+            client = new ChatClient("localhost", 1500, "Anonymous");
+        client.start();
+        client.sendMessage(new ChatMessage());
 
+        /*
         // Create your client and start it
         ChatClient client = new ChatClient("localhost", 1500, "CS 180 Student");
         client.start();
 
         // Send an empty message to the server
         client.sendMessage(new ChatMessage());
+        */
     }
 
 
