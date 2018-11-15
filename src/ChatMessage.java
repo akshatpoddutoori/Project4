@@ -21,35 +21,4 @@ final class ChatMessage implements Serializable {
     }
 
 
-
-    private void broadcast(String message) {
-
-    }
-
-    private boolean writeMessage(String msg) {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        Date date = new Date();
-        System.out.println(formatter.format(date));
-
-
-        return true;
-    }
-
-    private void remove(int id) {
-
-    }
-
-    public void run() {
-
-    }
-
-    private void close() {
-
-    }
-
-
-
-
-
-
 }

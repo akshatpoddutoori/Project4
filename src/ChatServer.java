@@ -3,7 +3,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 final class ChatServer {
@@ -74,6 +76,39 @@ final class ChatServer {
             }
         }
 
+        private synchronized void broadcast(String message) {
+            SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+            Date date = new Date();
+            try {
+                sOutput.writeObject(formatter.format(date));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            writeMessage(message);
+        }
+
+        public boolean writeMessage(String msg) {
+            if (socket.isConnected() == false) {
+                return false;
+            } else {
+                try {
+                    sOutput.writeObject(msg);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return true;
+            }
+        }
+
+
+        private void remove(int id) {
+
+        }
+
+
+
         /*
          * This is what the client thread actually runs.
          */
@@ -94,6 +129,10 @@ final class ChatServer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        private void close() {
+
         }
     }
 }
