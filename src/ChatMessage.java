@@ -11,6 +11,10 @@ final class ChatMessage implements Serializable {
     private String type;
     private String message;
 
+    public ChatMessage() {
+        super();
+    }
+
     public ChatMessage (int type, String message) {
         if (type == 0) {
             this.type = "general";
@@ -20,5 +24,7 @@ final class ChatMessage implements Serializable {
         this.message = message;
     }
 
-
+    public String getMessage() {
+        return message;
+    }
 }

@@ -88,14 +88,12 @@ final class ChatServer {
         }
 
         public boolean writeMessage(String msg) {
-            if (socket.isConnected() == false) {
+            if (!socket.isConnected()) {
                 return false;
             } else {
                 try {
                     sOutput.writeObject(msg);
                 } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 return true;
@@ -120,7 +118,9 @@ final class ChatServer {
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
-            System.out.println(username + ": Ping");
+//            System.out.println(username + ": Ping");
+//            broadcast(cm.getMessage());
+            System.out.println(username + cm.getMessage());
 
 
             // Send message back to the client
