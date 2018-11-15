@@ -91,7 +91,7 @@ final class ChatClient {
         else
             client = new ChatClient("localhost", 1500, "Anonymous");
         client.start();
-        client.sendMessage(new ChatMessage());
+        client.sendMessage(new ChatMessage(-1, ""));
         Scanner in = new Scanner(System.in);
         while (in.hasNext()) {
             String input = in.nextLine();

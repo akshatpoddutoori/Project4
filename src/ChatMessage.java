@@ -20,7 +20,8 @@ final class ChatMessage implements Serializable {
             this.type = "general";
         } else if (type == 1) {
             this.type = "logout";
-        }
+        } else
+            this.type = "connected";
         this.message = message;
     }
 

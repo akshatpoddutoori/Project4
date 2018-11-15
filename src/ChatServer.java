@@ -132,7 +132,7 @@ final class ChatServer {
 //            System.out.println(username + ": Ping");
 //            System.out.println("???" + cm.getMessage());
 //            broadcast(cm.getMessage());
-//            System.out.println(username + cm.getMessage());
+
 
 
                 // Send message back to the client
@@ -144,23 +144,27 @@ final class ChatServer {
                 SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
                 Date date = new Date();
                 if (cm.getMessage() != null) {
-                    if (cm.getMessage().toLowerCase().equals("/logout")) {
+                    if (cm.getType().equals("connected")) {
+                        System.out.println("Server waiting for Clients on port " + port + ".");
+                        System.out.println(username + " has connected.");
+                    }
+                    else if (cm.getType().equals("logout")) {
                         close();
                     }
-
-
-                    for (ClientThread c : clients) {
+                    else {
+                        for (ClientThread c : clients) {
 //                        try {
 //                            sOutput.writeObject(formatter.format(date) + " ");
 //                        } catch (IOException e) {
 //                            e.printStackTrace();
 //                        }
-                        c.writeMessage(formatter.format(date) + " " +
-                                username + ": " + cm.getMessage() + "\n");
+                            c.writeMessage(formatter.format(date) + " " +
+                                    username + ": " + cm.getMessage() + "\n");
 //                    broadcast(cm.getMessage());
+                        }
+                        System.out.println(formatter.format(date) + " " +
+                                username + ": " + cm.getMessage());
                     }
-                    System.out.println(formatter.format(date) + " " +
-                            username + ": " + cm.getMessage());
                 }
             }
         }
