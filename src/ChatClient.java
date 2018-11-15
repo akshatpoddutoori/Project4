@@ -97,14 +97,21 @@ final class ChatClient {
             String input = in.nextLine();
             if (input.toLowerCase().equals("/logout")) {
                 client.sendMessage(new ChatMessage(1, input));
-//                client.closeClient();
+                client.close();
             } else
                 client.sendMessage(new ChatMessage(0, input));
         }
     }
 
-
-
+    private void close() {
+        try {
+            sInput.close();
+            sOutput.close();
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     /*
      * This is a private class inside of the ChatClient

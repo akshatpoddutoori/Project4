@@ -27,4 +27,8 @@ final class ChatMessage implements Serializable {
     public String getMessage() {
         return message;
     }
+
+    public String getType() {
+        return type;
+    }
 }

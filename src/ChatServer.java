@@ -79,15 +79,19 @@ final class ChatServer {
         private synchronized void broadcast(String message) {
             SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
             Date date = new Date();
-            try {
-                sOutput.writeObject(formatter.format(date));
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (message != null) {
+                try {
+                    sOutput.writeObject(formatter.format(date) + " ");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+//                for (ClientThread c : clients) {
+//                    writeMessage(c.username + ": " + message + "\n");
+//                }
             }
-            writeMessage(message);
         }
 
-        public boolean writeMessage(String msg) {
+        private boolean writeMessage(String msg) {
             if (!socket.isConnected()) {
                 return false;
             } else {
@@ -107,32 +111,68 @@ final class ChatServer {
 
 
 
+
         /*
          * This is what the client thread actually runs.
          */
         @Override
         public void run() {
             // Read the username sent to you by client
-            try {
-                cm = (ChatMessage) sInput.readObject();
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+            while (true) {
+                try {
+//                while(true) {
+//                    String msg = (String) sInput.readObject();
+//                    System.out.print(msg);
+                    cm = (ChatMessage) sInput.readObject();
+//                    System.out.println(cm.getMessage());
+//                }
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
 //            System.out.println(username + ": Ping");
+//            System.out.println("???" + cm.getMessage());
 //            broadcast(cm.getMessage());
-            System.out.println(username + cm.getMessage());
+//            System.out.println(username + cm.getMessage());
 
 
-            // Send message back to the client
-            try {
-                sOutput.writeObject("Pong");
-            } catch (IOException e) {
-                e.printStackTrace();
+                // Send message back to the client
+//                try {
+//                    sOutput.writeObject("Pong");
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+                SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+                Date date = new Date();
+                if (cm.getMessage() != null) {
+                    if (cm.getMessage().toLowerCase().equals("/logout")) {
+                        close();
+                    }
+
+
+                    for (ClientThread c : clients) {
+//                        try {
+//                            sOutput.writeObject(formatter.format(date) + " ");
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
+                        c.writeMessage(formatter.format(date) + " " +
+                                username + ": " + cm.getMessage() + "\n");
+//                    broadcast(cm.getMessage());
+                    }
+                    System.out.println(formatter.format(date) + " " +
+                            username + ": " + cm.getMessage());
+                }
             }
         }
 
         private void close() {
-
+            try {
+                sInput.close();
+                sOutput.close();
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
