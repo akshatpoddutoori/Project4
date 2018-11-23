@@ -91,16 +91,35 @@ final class ChatClient {
         else
             client = new ChatClient("localhost", 1500, "Anonymous");
         client.start();
-        client.sendMessage(new ChatMessage(-1, ""));
+        client.sendMessage(new ChatMessage(-1, null));
+
         Scanner in = new Scanner(System.in);
         while (in.hasNext()) {
             String input = in.nextLine();
             if (input.toLowerCase().equals("/logout")) {
                 client.sendMessage(new ChatMessage(1, input));
                 client.close();
+            } else if (input.toLowerCase().indexOf("/msg ") == 0) {
+                try {
+                    String recipient = input.substring(5, input.indexOf(" ", 5));
+                    String msg = input.substring(input.indexOf(" ", input.indexOf(" ", 5)) + 1);
+                    client.sendMessage(new ChatMessage(2, recipient, msg));
+                } catch (Exception e) {
+                    System.out.print("Error sending message.\n");
+                }
+            } else if (input.toLowerCase().equals("/list")) {
+                client.sendMessage(new ChatMessage(3, null));
             } else
                 client.sendMessage(new ChatMessage(0, input));
         }
+
+
+//        // Create your client and start it
+//        ChatClient client = new ChatClient("localhost", 1500, "CS 180 Student");
+//        client.start();
+//
+//        // Send an empty message to the server
+//        client.sendMessage(new ChatMessage());
     }
 
     private void close() {
@@ -112,6 +131,7 @@ final class ChatClient {
             e.printStackTrace();
         }
     }
+
 
     /*
      * This is a private class inside of the ChatClient
@@ -126,7 +146,8 @@ final class ChatClient {
                     System.out.print(msg);
                 }
             } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
+                System.out.println("Server has closed the connection.");
+                System.exit(0);
             }
         }
     }

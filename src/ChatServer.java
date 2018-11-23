@@ -1,3 +1,5 @@
+
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -12,10 +14,17 @@ final class ChatServer {
     private static int uniqueId = 0;
     private final List<ClientThread> clients = new ArrayList<>();
     private final int port;
+    private ChatFilter filter;
 
 
     private ChatServer(int port) {
         this.port = port;
+        filter = new ChatFilter("");
+    }
+
+    private ChatServer(int port, ChatFilter filter) {
+        this.port = port;
+        this.filter = filter;
     }
 
     /*
@@ -25,6 +34,8 @@ final class ChatServer {
     private void start() {
         try {
             ServerSocket serverSocket = new ServerSocket(port);
+            SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+            System.out.println(formatter.format(new Date()) + " Server waiting to Clients on port " + port + ".");
             while(true) {
                 Socket socket = serverSocket.accept();
                 Runnable r = new ClientThread(socket, uniqueId++);
@@ -37,6 +48,40 @@ final class ChatServer {
         }
     }
 
+    private synchronized void broadcast(String message) {
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+        message = filter.filter(message);
+        for (ClientThread c : clients) {
+            c.writeMessage(formatter.format(new Date()) + " " + message);
+        }
+        System.out.println(formatter.format(new Date()) + " " + message);
+    }
+
+    //TODO is this synchronized? i think not
+    private boolean directMessage(String message, String sender, String recipient) {
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+        message = filter.filter(message);
+        if (!sender.equals(recipient)) {
+            for (ClientThread c : clients) {
+                if (c.username.equals(recipient)) {
+                    c.writeMessage(formatter.format(new Date()) + " " + sender + " -> " + recipient + ": " + message);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private synchronized void remove(int id) {
+        for (ClientThread c : clients) {
+            if (c.id == id) {
+                clients.remove(c);
+                break;
+            }
+        }
+    }
+
+
     /*
      *  > java ChatServer
      *  > java ChatServer portNumber
@@ -44,11 +89,18 @@ final class ChatServer {
      */
     public static void main(String[] args) {
         ChatServer server;
-        if (args.length == 1)
+        if (args.length == 2) {
+            server = new ChatServer(Integer.parseInt(args[0]), new ChatFilter(args[1]));
+            if (server.filter.numWords() > 0)
+                System.out.println(server.filter.toString());
+            server.start();
+        } else if (args.length == 1) {
             server = new ChatServer(Integer.parseInt(args[0]));
-        else
+            server.start();
+        } else {
             server = new ChatServer(1500);
-        server.start();
+            server.start();
+        }
     }
 
 
@@ -76,97 +128,41 @@ final class ChatServer {
             }
         }
 
-        private synchronized void broadcast(String message) {
-            SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-            Date date = new Date();
-            if (message != null) {
-                try {
-                    sOutput.writeObject(formatter.format(date) + " ");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-//                for (ClientThread c : clients) {
-//                    writeMessage(c.username + ": " + message + "\n");
-//                }
-            }
-        }
-
-        private boolean writeMessage(String msg) {
-            if (!socket.isConnected()) {
+        private boolean writeMessage(String message) {
+            if (!socket.isConnected())
                 return false;
-            } else {
-                try {
-                    sOutput.writeObject(msg);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            try {
+                sOutput.writeObject(message + "\n");
                 return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        // TODO should this be under ClientThread
+        // it lists all connected clients except urself
+        private void list() {
+            if (clients.size() > 1) {
+                String list = "";
+                for (ClientThread c : clients) {
+                    if (!c.username.equals(username))
+                        list += c.username + "\n";
+                }
+                list = list.substring(0, list.length() - 1);
+                writeMessage(list);
+            } else {
+                writeMessage("");
             }
         }
 
-
-        private void remove(int id) {
-
-        }
-
-
-
-
-        /*
-         * This is what the client thread actually runs.
-         */
-        @Override
-        public void run() {
-            // Read the username sent to you by client
-            while (true) {
-                try {
-//                while(true) {
-//                    String msg = (String) sInput.readObject();
-//                    System.out.print(msg);
-                    cm = (ChatMessage) sInput.readObject();
-//                    System.out.println(cm.getMessage());
-//                }
-                } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-//            System.out.println(username + ": Ping");
-//            System.out.println("???" + cm.getMessage());
-//            broadcast(cm.getMessage());
-
-
-
-                // Send message back to the client
-//                try {
-//                    sOutput.writeObject("Pong");
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-                SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-                Date date = new Date();
-                if (cm.getMessage() != null) {
-                    if (cm.getType().equals("connected")) {
-                        System.out.println("Server waiting for Clients on port " + port + ".");
-                        System.out.println(username + " has connected.");
-                    }
-                    else if (cm.getType().equals("logout")) {
-                        close();
-                    }
-                    else {
-                        for (ClientThread c : clients) {
-//                        try {
-//                            sOutput.writeObject(formatter.format(date) + " ");
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
-                            c.writeMessage(formatter.format(date) + " " +
-                                    username + ": " + cm.getMessage() + "\n");
-//                    broadcast(cm.getMessage());
-                        }
-                        System.out.println(formatter.format(date) + " " +
-                                username + ": " + cm.getMessage());
-                    }
-                }
+        private boolean uniqueUsername() {
+            int num = 0;
+            for (ClientThread c : clients) {
+                if (c.username.equals(username))
+                    num++;
             }
+            return num == 1;
         }
 
         private void close() {
@@ -177,6 +173,61 @@ final class ChatServer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        /*
+         * This is what the client thread actually runs.
+         */
+        @Override
+        public void run() {
+            // Read the username sent to you by client
+            SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+            boolean open = true;
+            while(open) {
+                try {
+                    cm = (ChatMessage) sInput.readObject();
+                    if (cm.getType() == ChatMessage.MessageType.CONNECTED) {    // when first connecting
+                        // check if username is unique
+                        if (uniqueUsername()) {
+                            writeMessage("Connection accepted localhost" + socket.getLocalSocketAddress());
+                            System.out.println(formatter.format(new Date()) + " " + username + " just connected.");
+                            System.out.println(formatter.format(new Date()) + " Server waiting for Clients on port " + port + ".");
+                        } else {
+                            // TODO not the best implementation to allow client to even connect when username invalid
+                            writeMessage("Username has already been taken.");
+                            close();
+                            remove(id);
+                            open = false;
+                        }
+                    } else if (cm.getType() == ChatMessage.MessageType.LOGOUT) {
+                        System.out.println(formatter.format(new Date()) + " " + username + " disconnected with a LOGOUT message.");
+                        close();
+                        remove(id);
+                        open = false;
+                    } else if (cm.getType() == ChatMessage.MessageType.GENERAL) {
+                        broadcast(username + ": " + cm.getMessage());
+                    } else if (cm.getType() == ChatMessage.MessageType.DIRECT) {  // DIRECT MESSAGE
+                        if (directMessage(cm.getMessage(), username, cm.getRecipient())) {
+                            writeMessage(formatter.format(new Date()) + " " + username + " -> " + cm.getRecipient() + ": " + cm.getMessage());
+                            System.out.println(formatter.format(new Date()) + " " + username + " -> " + cm.getRecipient() + ": " + cm.getMessage());
+                        } else
+                            writeMessage("Recipient not found.");
+                    } else if (cm.getType() == ChatMessage.MessageType.LIST) {
+                        list();
+                    }
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+
+//            System.out.println(username + ": Ping");
+//
+//            // Send message back to the client
+//            try {
+//                sOutput.writeObject("Pong");
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 }
