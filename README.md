@@ -1,6 +1,5 @@
 # Project4
-v2.0
-Features:
+v2.0 Features:
 - checks if a client username is unique
 	- allows client to connect but disconnects if username is taken
 	- poor solution? probably shouldn’t allow to connect at all
@@ -15,6 +14,7 @@ Features:
 - ChatFilter
 	- currently case sensitive to the word list
 	-  runs server with no banned words if file not found
+
 Known issues:
 - starting client before server throws exceptions
 - force quitting client without /logout throws exceptions in server
