@@ -16,6 +16,5 @@ v2.0 Features:
 	- runs server with no banned words if file not found
 
 Known issues:
-- starting client before server throws exceptions
 - force quitting client without /logout throws exceptions in server
 - doesn’t prompt with ‘> ’
