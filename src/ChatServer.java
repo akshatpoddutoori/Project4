@@ -214,7 +214,10 @@ final class ChatServer {
                         list();
                     }
                 } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
+                    System.out.println(formatter.format(new Date()) + " " + username + " disconnected.");
+                    close();
+                    remove(id);
+                    open = false;
                 }
             }
 
