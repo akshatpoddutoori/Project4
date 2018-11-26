@@ -12,8 +12,8 @@ v2.0 Features:
 - /logout
 	- works as expected but uses System.exit(0)
 - ChatFilter
-	- currently case sensitive to the word list
-	-  runs server with no banned words if file not found
+	- case insensitive to the word list
+	- runs server with no banned words if file not found
 
 Known issues:
 - starting client before server throws exceptions
