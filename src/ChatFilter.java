@@ -19,14 +19,13 @@ public class ChatFilter {
         }
     }
 
-    // TODO should the list be case insensitive?
     public String filter(String msg) {
         for (String word : blacklist) {
             String censored = "";
             for (int i = 0; i < word.length(); i++) {
                 censored += "*";
             }
-            msg = msg.replaceAll(word, censored);
+            msg = msg.replaceAll("(?i)"+word, censored);
         }
         return msg;
     }
