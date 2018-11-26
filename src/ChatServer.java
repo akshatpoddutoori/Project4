@@ -57,7 +57,6 @@ final class ChatServer {
         System.out.println(formatter.format(new Date()) + " " + message);
     }
 
-    //TODO is this synchronized? i think not
     private boolean directMessage(String message, String sender, String recipient) {
         SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
         message = filter.filter(message);
@@ -129,6 +128,7 @@ final class ChatServer {
         }
 
         private boolean writeMessage(String message) {
+            message = filter.filter(message);
             if (!socket.isConnected())
                 return false;
             try {
@@ -140,7 +140,6 @@ final class ChatServer {
             return false;
         }
 
-        // TODO should this be under ClientThread
         // it lists all connected clients except urself
         private void list() {
             if (clients.size() > 1) {
@@ -193,7 +192,6 @@ final class ChatServer {
                             System.out.println(formatter.format(new Date()) + " " + username + " just connected.");
                             System.out.println(formatter.format(new Date()) + " Server waiting for Clients on port " + port + ".");
                         } else {
-                            // TODO not the best implementation to allow client to even connect when username invalid
                             writeMessage("Username has already been taken.");
                             close();
                             remove(id);
@@ -209,7 +207,7 @@ final class ChatServer {
                     } else if (cm.getType() == ChatMessage.MessageType.DIRECT) {  // DIRECT MESSAGE
                         if (directMessage(cm.getMessage(), username, cm.getRecipient())) {
                             writeMessage(formatter.format(new Date()) + " " + username + " -> " + cm.getRecipient() + ": " + cm.getMessage());
-                            System.out.println(formatter.format(new Date()) + " " + username + " -> " + cm.getRecipient() + ": " + cm.getMessage());
+                            System.out.println(formatter.format(new Date()) + " " + username + " -> " + cm.getRecipient() + ": " + filter.filter(cm.getMessage()));
                         } else
                             writeMessage("Recipient not found.");
                     } else if (cm.getType() == ChatMessage.MessageType.LIST) {

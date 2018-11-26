@@ -27,7 +27,7 @@ final class ChatClient {
         try {
             socket = new Socket(server, port);
         } catch (IOException e) {
-            e.printStackTrace();
+            return false;
         }
 
         // Create your input and output streams
@@ -35,7 +35,7 @@ final class ChatClient {
             sInput = new ObjectInputStream(socket.getInputStream());
             sOutput = new ObjectOutputStream(socket.getOutputStream());
         } catch (IOException e) {
-            e.printStackTrace();
+            return false;
         }
 
         // This thread will listen from the server for incoming messages
@@ -47,7 +47,7 @@ final class ChatClient {
         try {
             sOutput.writeObject(username);
         } catch (IOException e) {
-            e.printStackTrace();
+            return false;
         }
 
         return true;
@@ -90,27 +90,28 @@ final class ChatClient {
             client = new ChatClient("localhost", 1500, args[0]);
         else
             client = new ChatClient("localhost", 1500, "Anonymous");
-        client.start();
-        client.sendMessage(new ChatMessage(-1, null));
+        if (client.start()) {
+            client.sendMessage(new ChatMessage(-1, null));
 
-        Scanner in = new Scanner(System.in);
-        while (in.hasNext()) {
-            String input = in.nextLine();
-            if (input.toLowerCase().equals("/logout")) {
-                client.sendMessage(new ChatMessage(1, input));
-                client.close();
-            } else if (input.toLowerCase().indexOf("/msg ") == 0) {
-                try {
-                    String recipient = input.substring(5, input.indexOf(" ", 5));
-                    String msg = input.substring(input.indexOf(" ", input.indexOf(" ", 5)) + 1);
-                    client.sendMessage(new ChatMessage(2, recipient, msg));
-                } catch (Exception e) {
-                    System.out.print("Error sending message.\n");
-                }
-            } else if (input.toLowerCase().equals("/list")) {
-                client.sendMessage(new ChatMessage(3, null));
-            } else
-                client.sendMessage(new ChatMessage(0, input));
+            Scanner in = new Scanner(System.in);
+            while (in.hasNext()) {
+                String input = in.nextLine();
+                if (input.toLowerCase().equals("/logout")) {
+                    client.sendMessage(new ChatMessage(1, input));
+                    client.close();
+                } else if (input.toLowerCase().indexOf("/msg ") == 0) {
+                    try {
+                        String recipient = input.substring(5, input.indexOf(" ", 5));
+                        String msg = input.substring(input.indexOf(" ", input.indexOf(" ", 5)) + 1);
+                        client.sendMessage(new ChatMessage(2, recipient, msg));
+                    } catch (Exception e) {
+                        System.out.print("Error sending message.\n");
+                    }
+                } else if (input.toLowerCase().equals("/list")) {
+                    client.sendMessage(new ChatMessage(3, null));
+                } else
+                    client.sendMessage(new ChatMessage(0, input));
+            }
         }
 
 
