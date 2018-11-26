@@ -11,10 +11,10 @@ v2.0 Features:
 	- allows sending empty message
 - /logout
 	- works as expected but uses System.exit(0)
+	- force quitting disconnects without LOGOUT message
 - ChatFilter
 	- case insensitive to the word list
 	- runs server with no banned words if file not found
 
 Known issues:
-- force quitting client without /logout throws exceptions in server
 - doesn’t prompt with ‘> ’
